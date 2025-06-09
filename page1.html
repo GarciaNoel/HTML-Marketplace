@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Text Editor with LLM Code Input</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #save-btn, #send-llm-btn {
+      margin: 8px 8px 0 8px;
+      padding: 8px 16px;
+      font-size: 1em;
+    }
+    #editor, #code-input {
+      width: calc(100% - 20px);
+      margin: 8px 8px 0 8px;
+      font-size: 1.1em;
+      font-family: monospace;
+      box-sizing: border-box;
+      resize: vertical;
+      min-height: 60px;
+      max-height: 30vh;
+      overflow: auto;
+      display: block;
+    }
+    #editor { height: 20vh; }
+    #code-input { height: 15vh; }
+    #llm-response {
+      margin: 8px;
+      padding: 10px;
+      background: #f4f4f4;
+      border: 1px solid #ccc;
+      min-height: 40px;
+      max-height: 20vh;
+      font-family: monospace;
+      white-space: pre-wrap;
+      overflow: auto;
+    }
+    h3 {
+      margin: 12px 8px 4px 8px;
+    }
+  </style>
+</head>
+<body>
+  <button id="save-btn">Save</button>
+  <textarea id="editor" placeholder="Type your text here..."></textarea>
+  <h3>Code Input for LLM (Ollama):</h3>
+  <textarea id="code-input" placeholder="Paste code here to send to LLM..."></textarea>
+  <button id="send-llm-btn">Send to LLM</button>
+  <div id="llm-response"></div>
+  <script>
+    // Save to file (works in Electron with nodeIntegration)
+    document.getElementById('save-btn').onclick = function() {
+      const text = document.getElementById('editor').value;
+      const { dialog } = require('electron').remote || require('@electron/remote');
+      const fs = require('fs');
+      dialog.showSaveDialog({
+        title: 'Save Text File',
+        defaultPath: 'document.txt',
+        filters: [{ name: 'Text Files', extensions: ['txt'] }]
+      }).then(result => {
+        if (!result.canceled && result.filePath) {
+          fs.writeFileSync(result.filePath, text, 'utf-8');
+          alert('File saved!');
+        }
+      });
+    };
+
+    // Send code to LLM (Ollama)
+    document.getElementById('send-llm-btn').onclick = async function() {
+      const code = document.getElementById('code-input').value;
+      const responseDiv = document.getElementById('llm-response');
+      responseDiv.textContent = "Waiting for LLM response...";
+      try {
+        const result = await window.ipcRenderer.invoke('llm-generate', {
+          model: 'deepseek-r1:1.5b',
+          prompt: code
+        });
+        responseDiv.textContent = result;
+      } catch (e) {
+        responseDiv.textContent = "Error: " + e.message;
+      }
+    };
+  </script>
+</body>
+</html>

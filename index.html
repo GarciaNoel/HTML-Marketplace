@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>HTML Tabs Loader</title>
+  <style>
+    #tabs { display: flex; border-bottom: 1px solid #ccc; }
+    .tab { padding: 8px 16px; cursor: pointer; border: 1px solid #ccc; border-bottom: none; background: #eee; }
+    .tab.active { background: #fff; font-weight: bold; }
+    #tab-contents > div { display: none; padding: 10px; }
+    #tab-contents > div.active { display: block; }
+    #open-btn { margin: 10px; }
+    .tab-content { width: 100%; min-height: 400px; }
+  </style>
+</head>
+<body>
+  <button id="open-btn">Open HTML File(s)</button>
+  <div id="tabs"></div>
+  <div id="tab-contents"></div>
+  <script>
+    const { ipcRenderer } = require('electron')
+    window.ipcRenderer = ipcRenderer;
+    const openBtn = document.getElementById('open-btn')
+    const tabs = document.getElementById('tabs')
+    const tabContents = document.getElementById('tab-contents')
+
+    let tabData = []
+
+    openBtn.onclick = async () => {
+      const files = await ipcRenderer.invoke('open-html-files')
+      files.forEach(file => addTab(file.name, file.content))
+    }
+
+    function addTab(name, content) {
+      const idx = tabData.length
+      tabData.push({ name, content })
+
+      // Tab button
+      const tab = document.createElement('div')
+      tab.className = 'tab'
+      tab.textContent = name
+      tab.onclick = () => setActiveTab(idx)
+      tabs.appendChild(tab)
+
+      // Tab content
+      const contentDiv = document.createElement('div')
+      contentDiv.className = 'tab-content'
+      contentDiv.innerHTML = content
+      tabContents.appendChild(contentDiv)
+
+      // Execute scripts in the loaded HTML
+      executeScripts(contentDiv);
+
+      setActiveTab(idx)
+    }
+
+    // Helper to execute scripts in a container
+    function executeScripts(container) {
+      const scripts = container.querySelectorAll('script');
+      scripts.forEach(oldScript => {
+        const newScript = document.createElement('script');
+        // Copy attributes
+        for (const attr of oldScript.attributes) {
+          newScript.setAttribute(attr.name, attr.value);
+        }
+        newScript.text = oldScript.text;
+        oldScript.parentNode.replaceChild(newScript, oldScript);
+      });
+    }
+
+    function setActiveTab(idx) {
+      Array.from(tabs.children).forEach((tab, i) => tab.classList.toggle('active', i === idx));
+      Array.from(tabContents.children).forEach((div, i) => div.classList.toggle('active', i === idx));
+    }
+  </script>
+</body>
+</html>
