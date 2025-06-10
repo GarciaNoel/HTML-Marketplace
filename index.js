@@ -2,34 +2,83 @@ const { app, BrowserWindow, dialog, ipcMain } = require('electron')
 const fs = require('fs')
 const path = require('path')
 
+const DEFAULT_PAGES_PATH = path.join(__dirname, 'defaultPages.json');
+
+function loadDefaultPages() {
+  if (fs.existsSync(DEFAULT_PAGES_PATH)) {
+    return JSON.parse(fs.readFileSync(DEFAULT_PAGES_PATH, 'utf-8'));
+  }
+  return [
+    path.join(__dirname, 'page1.html'),
+    path.join(__dirname, 'page2.html'),
+    path.join(__dirname, 'page3.html')
+  ];
+}
+
+function saveDefaultPages(pages) {
+  fs.writeFileSync(DEFAULT_PAGES_PATH, JSON.stringify(pages, null, 2), 'utf-8');
+}
+
+let defaultPages = loadDefaultPages();
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1000,
     height: 700,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false,
+      contextIsolation: true
     }
   })
 
+  win.setMenu(null);
+
   win.loadFile('index.html')
+
+  win.webContents.on('did-finish-load', () => {
+    const pages = defaultPages
+      .filter(fp => fs.existsSync(fp))
+      .map(fp => ({
+        name: path.basename(fp),
+        content: fs.readFileSync(fp, 'utf-8')
+      }));
+    win.webContents.send('default-pages', pages);
+  });
 
   ipcMain.handle('open-html-files', async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog(win, {
       filters: [{ name: 'HTML Files', extensions: ['html', 'htm'] }],
       properties: ['openFile', 'multiSelections']
-    })
-    if (canceled || filePaths.length === 0) return []
+    });
+    if (canceled || filePaths.length === 0) return [];
+    
+    let updated = false;
+    for (const filePath of filePaths) {
+      if (!defaultPages.includes(filePath)) {
+        defaultPages.push(filePath);
+        updated = true;
+      }
+    }
+    if (updated) saveDefaultPages(defaultPages);
+
     return filePaths.map(filePath => ({
       name: path.basename(filePath),
       content: fs.readFileSync(filePath, 'utf-8')
-    }))
-  })
+    }));
+  });
 
-  const http = require('http'); // or use 'node-fetch' if you prefer
+  ipcMain.handle('add-Tab', (event, name, content) => {
+    const win = BrowserWindow.getFocusedWindow();
+    if (win) {
+      win.webContents.send('add-tab', { name, content });
+      win.loadFile('index.html')
+    }
+  });
+
+  const http = require('http'); 
 
   ipcMain.handle('llm-generate', async (event, { model, prompt }) => {
-    // Using Node's http for compatibility, but you can use fetch if available
     return new Promise((resolve, reject) => {
       const data = JSON.stringify({
         model,

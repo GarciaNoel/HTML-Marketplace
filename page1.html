@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Text Editor with LLM Code Input</title>
+  <title>Page1</title>
   <style>
     html, body {
       height: 100%;
@@ -54,12 +54,11 @@
 <body>
   <button id="save-btn">Save</button>
   <textarea id="editor" placeholder="Type your text here..."></textarea>
-  <h3>Code Input for LLM (Ollama):</h3>
+  <h3>Input for LLM:</h3>
   <textarea id="code-input" placeholder="Paste code here to send to LLM..."></textarea>
-  <button id="send-llm-btn">Send to LLM</button>
+  <button id="send-llm-btn">Send</button>
   <div id="llm-response"></div>
   <script>
-    // Save to file (works in Electron with nodeIntegration)
     document.getElementById('save-btn').onclick = function() {
       const text = document.getElementById('editor').value;
       const { dialog } = require('electron').remote || require('@electron/remote');
@@ -76,16 +75,12 @@
       });
     };
 
-    // Send code to LLM (Ollama)
     document.getElementById('send-llm-btn').onclick = async function() {
       const code = document.getElementById('code-input').value;
       const responseDiv = document.getElementById('llm-response');
       responseDiv.textContent = "Waiting for LLM response...";
       try {
-        const result = await window.ipcRenderer.invoke('llm-generate', {
-          model: 'deepseek-r1:1.5b',
-          prompt: code
-        });
+        const result = await window.electronAPI.llmGenerate('deepseek-r1:1.5b', code);
         responseDiv.textContent = result;
       } catch (e) {
         responseDiv.textContent = "Error: " + e.message;

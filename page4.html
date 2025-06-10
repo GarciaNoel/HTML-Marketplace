@@ -6,10 +6,10 @@
 </head>
 <body>
   <h1>Download</h1>
-    <button id="send">Open HTML File(s)</button>
+    <button id="test3">Open HTML File(s)</button>
     <script>
-      const sendBtn = document.getElementById('send')
-      sendBtn.onclick = async (e) => {
+      const test3Btn = document.getElementById('test3')
+      test3Btn.onclick = async (e) => {
         e.preventDefault(); // Prevent form submission
         const files = await window.electronAPI.openHtmlFiles();
         files.forEach(file => window.electronAPI.addTab(file.name, file.content));
