@@ -5,10 +5,13 @@ const DATA_PATH = path.join(__dirname, 'user-data.json');
 
 function loadData() {
   if (fs.existsSync(DATA_PATH)) {
+
     try {
       return JSON.parse(fs.readFileSync(DATA_PATH, 'utf-8'));
+
     } catch {
       return {};
+      
     }
   }
   return {};

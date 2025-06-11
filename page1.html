@@ -28,12 +28,13 @@
     let llmCoin = 0;
     const llmCoinSpan = document.getElementById('llm-coin');
 
-    // Load coin count from persistent storage on startup
     (async () => {
       const saved = await window.electronAPI.loadPersistent?.('llmCoin');
+
       if (typeof saved === 'number') {
         llmCoin = saved;
         llmCoinSpan.textContent = `🪙 ${llmCoin}`;
+
       }
     })();
 
@@ -44,16 +45,14 @@
     }
 
     const test2Btn = document.getElementById('test2');
+
     test2Btn.onclick = async (e) => {
       e.preventDefault();
       const files = await window.electronAPI.openHtmlFiles();
       files.forEach(file => window.electronAPI.addTab(file.name, file.content));
     };
 
-    // Example LLM usage button (replace with your actual LLM call)
     document.getElementById('use-llm-btn').onclick = async () => {
-      // Simulate LLM usage
-      // await window.electronAPI.llmGenerate('model', 'prompt');
       incrementCoin();
     };
   </script>

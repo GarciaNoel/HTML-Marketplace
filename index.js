@@ -1,7 +1,6 @@
 const { app, BrowserWindow, dialog, ipcMain } = require('electron')
 const fs = require('fs')
 const path = require('path')
-
 const { loadData, saveData } = require('./storage.js');
 
 const DEFAULT_PAGES_PATH = path.join(__dirname, 'defaultPages.json');
@@ -9,6 +8,7 @@ const DEFAULT_PAGES_PATH = path.join(__dirname, 'defaultPages.json');
 function loadDefaultPages() {
   if (fs.existsSync(DEFAULT_PAGES_PATH)) {
     return JSON.parse(fs.readFileSync(DEFAULT_PAGES_PATH, 'utf-8'));
+
   }
   return [
     path.join(__dirname, 'page1.html'),
@@ -22,7 +22,6 @@ function saveDefaultPages(pages) {
 }
 
 let defaultPages = loadDefaultPages();
-
 let persistentData = loadData();
 
 function createWindow() {
@@ -37,7 +36,6 @@ function createWindow() {
   })
 
   win.setMenu(null);
-
   win.loadFile('index.html')
 
   ipcMain.handle('save-persistent', (event, key, value) => {
@@ -64,15 +62,19 @@ function createWindow() {
       filters: [{ name: 'HTML Files', extensions: ['html', 'htm'] }],
       properties: ['openFile', 'multiSelections']
     });
+
     if (canceled || filePaths.length === 0) return [];
-    
     let updated = false;
+
     for (const filePath of filePaths) {
+
       if (!defaultPages.includes(filePath)) {
         defaultPages.push(filePath);
         updated = true;
+
       }
     }
+
     if (updated) saveDefaultPages(defaultPages);
 
     return filePaths.map(filePath => ({
@@ -83,9 +85,11 @@ function createWindow() {
 
   ipcMain.handle('add-Tab', (event, name, content) => {
     const win = BrowserWindow.getFocusedWindow();
+
     if (win) {
       win.webContents.send('add-tab', { name, content });
       win.loadFile('index.html')
+
     }
   });
 
@@ -115,8 +119,10 @@ function createWindow() {
           try {
             const json = JSON.parse(body);
             resolve(json.response || body);
+
           } catch (e) {
             resolve(body);
+            
           }
         });
       });

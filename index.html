@@ -63,10 +63,8 @@
     window.electronAPI.onDefaultPages(pages => {
       pages.forEach(page => addTab(page.name, page.content));
     });
-
     const tabs = document.getElementById('tabs')
     const tabContents = document.getElementById('tab-contents')
-
     let tabData = []
 
     function extractTitle(html) {
@@ -75,34 +73,30 @@
     }
 
     function addTab(name, content) {
-      // Use the HTML <title> if present
       const title = extractTitle(content);
       const tabName = title || name;
-
       const idx = tabData.length;
       tabData.push({ name: tabName, content });
-
       const tab = document.createElement('div');
       tab.className = 'tab';
       tab.textContent = tabName;
+
       tab.onclick = () => setActiveTab(idx);
-
       tabs.appendChild(tab);
-
       const contentDiv = document.createElement('div');
       contentDiv.className = 'tab-content';
       contentDiv.innerHTML = content;
       tabContents.appendChild(contentDiv);
-
       executeScripts(contentDiv);
-
       setActiveTab(idx);
     }
 
     function executeScripts(container) {
       const scripts = container.querySelectorAll('script');
+
       scripts.forEach(oldScript => {
         const newScript = document.createElement('script');
+        
         for (const attr of oldScript.attributes) {
           newScript.setAttribute(attr.name, attr.value);
         }

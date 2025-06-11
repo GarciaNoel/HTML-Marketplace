@@ -88,9 +88,11 @@
 
     (async () => {
       const savedHistory = await window.electronAPI.loadPersistent('chatHistory');
+
       if (savedHistory) {
         promptHistory.push(...savedHistory);
         renderHistory();
+
       }
     })();
 
@@ -105,12 +107,11 @@
 
     sendBtn.onclick = async () => {
       const prompt = promptInput.value.trim();
+
       if (!prompt) return;
       promptHistory.push({ role: 'user', text: prompt });
       renderHistory();
       promptInput.value = '';
-
-      // Format the chat history as a single prompt string for the LLM
       const llmPrompt = promptHistory.map(
         msg => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.text}`
       ).join('\n') + '\nAssistant:';
@@ -119,11 +120,12 @@
         const result = await window.electronAPI.llmGenerate('deepseek-r1:1.5b', llmPrompt);
         promptHistory.push({ role: 'llm', text: result });
         renderHistory();
-        // Save updated history
         await window.electronAPI.savePersistent('chatHistory', promptHistory);
+
       } catch (e) {
         promptHistory.push({ role: 'llm', text: "Error: " + e.message });
         renderHistory();
+        
       }
     };
   </script>

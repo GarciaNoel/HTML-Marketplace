@@ -12,7 +12,7 @@
       font-family: sans-serif;
     }
     .page-te-root .editor-section {
-      flex: 2 1 0; /* Takes 1 part */
+      flex: 2 1 0;
       display: flex;
       flex-direction: column;
       box-sizing: border-box;
@@ -22,7 +22,7 @@
       background: #fafbfc;
     }
     .page-te-root .llm-section {
-      flex: 1 1 0; /* Takes 2 parts */
+      flex: 1 1 0;
       display: flex;
       flex-direction: column;
       box-sizing: border-box;
@@ -79,6 +79,7 @@
       const text = document.getElementById('editor').value;
       const { dialog } = require('electron').remote || require('@electron/remote');
       const fs = require('fs');
+
       dialog.showSaveDialog({
         title: 'Save Text File',
         defaultPath: 'document.txt',
@@ -105,24 +106,25 @@
 
     document.getElementById('send-llm-btn').onclick = async function() {
       const code = document.getElementById('code-input').value;
+
       if (!code.trim()) return;
       chatHistory.push({ role: 'user', text: code });
       renderChatHistory();
-
-      // Format the chat history as a single prompt string
       const prompt = chatHistory.map(msg =>
         `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.text}`
       ).join('\n') + '\nAssistant:';
-
       const responseDiv = document.getElementById('llm-response');
       responseDiv.textContent = "Waiting for LLM response...";
+
       try {
         const result = await window.electronAPI.llmGenerate('deepseek-r1:1.5b', prompt);
         chatHistory.push({ role: 'llm', text: result });
         renderChatHistory();
         responseDiv.textContent = result;
+
       } catch (e) {
         responseDiv.textContent = "Error: " + e.message;
+
       }
     };
 
@@ -131,11 +133,14 @@
       const code = document.getElementById('code-input').value;
       const responseDiv = document.getElementById('llm-response');
       responseDiv.textContent = "Waiting for LLM response...";
+
       try {
         const result = await window.electronAPI.llmGenerate('deepseek-r1:1.5b', code);
         responseDiv.textContent = result;
+
       } catch (e) {
         responseDiv.textContent = "Error: " + e.message;
+
       }
     };
     */
