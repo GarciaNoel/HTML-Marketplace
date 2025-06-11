@@ -96,6 +96,16 @@
       }
     })();
 
+    async function incrementCoin(amount = 1) {
+      let coins = await window.electronAPI.loadPersistent?.('llmCoin');
+
+      if (typeof coins !== 'number') coins = 0;
+      coins += amount;
+      await window.electronAPI.savePersistent?.('llmCoin', coins);
+
+      return coins;
+    }
+
     function renderHistory() {
       historyList.innerHTML = promptHistory.map(
         msg => `<li class="${msg.role === 'llm' ? 'llm' : ''}">
@@ -127,6 +137,7 @@
         renderHistory();
         
       }
+      await incrementCoin(1);
     };
   </script>
 </body>

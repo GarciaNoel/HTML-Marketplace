@@ -94,6 +94,26 @@
 
     const chatHistory = [];
 
+    (async () => {
+      const savedHistory = await window.electronAPI.loadPersistent?.('editorChatHistory');
+      
+      if (Array.isArray(savedHistory)) {
+        chatHistory.push(...savedHistory);
+        renderChatHistory();
+
+      }
+    })();
+
+    async function incrementCoin(amount = 1) {
+      let coins = await window.electronAPI.loadPersistent?.('llmCoin');
+
+      if (typeof coins !== 'number') coins = 0;
+      coins += amount;
+      await window.electronAPI.savePersistent?.('llmCoin', coins);
+
+      return coins;
+    }
+
     function renderChatHistory() {
       const chatDiv = document.getElementById('llm-response');
       chatDiv.innerHTML = chatHistory.map(msg =>
@@ -110,6 +130,8 @@
       if (!code.trim()) return;
       chatHistory.push({ role: 'user', text: code });
       renderChatHistory();
+      await window.electronAPI.savePersistent?.('editorChatHistory', chatHistory);
+
       const prompt = chatHistory.map(msg =>
         `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.text}`
       ).join('\n') + '\nAssistant:';
@@ -120,12 +142,14 @@
         const result = await window.electronAPI.llmGenerate('deepseek-r1:1.5b', prompt);
         chatHistory.push({ role: 'llm', text: result });
         renderChatHistory();
+        await window.electronAPI.savePersistent?.('editorChatHistory', chatHistory);
         responseDiv.textContent = result;
 
       } catch (e) {
         responseDiv.textContent = "Error: " + e.message;
 
       }
+      await incrementCoin(1);
     };
 
     /* SINGLE LLM CALL EXAMPLE

@@ -9,7 +9,7 @@
     }
     .llm-coin {
       display: inline-block;
-      margin-left: 16px;
+      margin-left: 0;
       font-weight: bold;
       color: #e6b800;
     }
@@ -18,33 +18,40 @@
 <body>
   <div class="page-mp-root">
     <h1>
-      Open File Extensions
-      <span class="llm-coin" id="llm-coin">🪙 0</span>
+      Unlock Extensions
     </h1>
+    <h3>  
+      <span class="llm-coin" id="llm-coin"></span>
+    </h3>
     <button id="test2">Open HTML File(s)</button>
-    <button id="use-llm-btn">Use LLM</button>
+    <button id="refresh-btn">Refresh coins</button>
   </div>
   <script>
     let llmCoin = 0;
     const llmCoinSpan = document.getElementById('llm-coin');
 
-    (async () => {
+    let refreshCoinDisplay = async () => {
       const saved = await window.electronAPI.loadPersistent?.('llmCoin');
 
       if (typeof saved === 'number') {
         llmCoin = saved;
-        llmCoinSpan.textContent = `🪙 ${llmCoin}`;
+        llmCoinSpan.textContent = `LLM TOKEN(S) ${llmCoin}`;
 
       }
-    })();
+    };
 
-    function incrementCoin() {
+    window.addEventListener('focus', refreshCoinDisplay);
+    refreshCoinDisplay();
+
+    async function incrementCoin() {
+      let saved = await window.electronAPI.loadPersistent?.('llmCoin');
+      let llmCoin = typeof saved === 'number' ? saved : 0;
       llmCoin++;
-      llmCoinSpan.textContent = `🪙 ${llmCoin}`;
-      window.electronAPI.savePersistent?.('llmCoin', llmCoin);
+      await window.electronAPI.savePersistent?.('llmCoin', llmCoin);
     }
 
     const test2Btn = document.getElementById('test2');
+    const refreshBtn = document.getElementById('refresh-btn');
 
     test2Btn.onclick = async (e) => {
       e.preventDefault();
@@ -52,9 +59,9 @@
       files.forEach(file => window.electronAPI.addTab(file.name, file.content));
     };
 
-    document.getElementById('use-llm-btn').onclick = async () => {
-      incrementCoin();
-    };
+    refreshBtn.onclick = async () => {
+      await refreshCoinDisplay();
+    };    
   </script>
 </body>
 </html>
