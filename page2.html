@@ -2,18 +2,16 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Page2</title>
+  <title>Central AI</title>
+  <style>
+    .page-ai-root {
+      padding-left: 10px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Download</h1>
-    <button id="send">Open HTML File(s)</button>
-    <script>
-      const sendBtn = document.getElementById('send')
-      sendBtn.onclick = async (e) => {
-        e.preventDefault(); // Prevent form submission
-        const files = await window.electronAPI.openHtmlFiles();
-        files.forEach(file => window.electronAPI.addTab(file.name, file.content));
-      }
-    </script>
+  <div class="page-ai-root">
+    <h1>Central AI</h1>
+  </div>
 </body>
 </html>

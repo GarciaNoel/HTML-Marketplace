@@ -16,7 +16,13 @@ the application loads after starting.
 ## Development
 
 To run this:
+
+run this command,
 ```bash
 npm run start
 ```
-
+make sure to have ollama installed,
+and you download 'deepseek-r1:1.5b'
+```bash
+ollama run deepseek-r1:1.5b
+```

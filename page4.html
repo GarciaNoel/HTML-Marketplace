@@ -2,18 +2,16 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Page2</title>
+  <title>Video Watcher</title>
+  <style>
+    .page-vw-root {
+      padding-left: 10px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Download</h1>
-    <button id="test3">Open HTML File(s)</button>
-    <script>
-      const test3Btn = document.getElementById('test3')
-      test3Btn.onclick = async (e) => {
-        e.preventDefault(); // Prevent form submission
-        const files = await window.electronAPI.openHtmlFiles();
-        files.forEach(file => window.electronAPI.addTab(file.name, file.content));
-      }
-    </script>
+  <div class="page-vw-root">
+    <h1>Watch</h1>
+  </div>
 </body>
 </html>
