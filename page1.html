@@ -7,20 +7,55 @@
     .page-mp-root {
       padding-left: 10px;
     }
+    .llm-coin {
+      display: inline-block;
+      margin-left: 16px;
+      font-weight: bold;
+      color: #e6b800;
+    }
   </style>
 </head>
 <body>
   <div class="page-mp-root">
-    <h1>Open File Extensions</h1>
+    <h1>
+      Open File Extensions
+      <span class="llm-coin" id="llm-coin">🪙 0</span>
+    </h1>
     <button id="test2">Open HTML File(s)</button>
+    <button id="use-llm-btn">Use LLM</button>
   </div>
   <script>
-    const test2Btn = document.getElementById('test2')
+    let llmCoin = 0;
+    const llmCoinSpan = document.getElementById('llm-coin');
+
+    // Load coin count from persistent storage on startup
+    (async () => {
+      const saved = await window.electronAPI.loadPersistent?.('llmCoin');
+      if (typeof saved === 'number') {
+        llmCoin = saved;
+        llmCoinSpan.textContent = `🪙 ${llmCoin}`;
+      }
+    })();
+
+    function incrementCoin() {
+      llmCoin++;
+      llmCoinSpan.textContent = `🪙 ${llmCoin}`;
+      window.electronAPI.savePersistent?.('llmCoin', llmCoin);
+    }
+
+    const test2Btn = document.getElementById('test2');
     test2Btn.onclick = async (e) => {
-      e.preventDefault(); // Prevent form submission
+      e.preventDefault();
       const files = await window.electronAPI.openHtmlFiles();
       files.forEach(file => window.electronAPI.addTab(file.name, file.content));
-    }
+    };
+
+    // Example LLM usage button (replace with your actual LLM call)
+    document.getElementById('use-llm-btn').onclick = async () => {
+      // Simulate LLM usage
+      // await window.electronAPI.llmGenerate('model', 'prompt');
+      incrementCoin();
+    };
   </script>
 </body>
 </html>

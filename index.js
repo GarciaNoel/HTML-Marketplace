@@ -2,6 +2,8 @@ const { app, BrowserWindow, dialog, ipcMain } = require('electron')
 const fs = require('fs')
 const path = require('path')
 
+const { loadData, saveData } = require('./storage.js');
+
 const DEFAULT_PAGES_PATH = path.join(__dirname, 'defaultPages.json');
 
 function loadDefaultPages() {
@@ -21,6 +23,8 @@ function saveDefaultPages(pages) {
 
 let defaultPages = loadDefaultPages();
 
+let persistentData = loadData();
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1000,
@@ -35,6 +39,15 @@ function createWindow() {
   win.setMenu(null);
 
   win.loadFile('index.html')
+
+  ipcMain.handle('save-persistent', (event, key, value) => {
+    persistentData[key] = value;
+    saveData(persistentData);
+  });
+
+  ipcMain.handle('load-persistent', (event, key) => {
+    return persistentData[key];
+  });
 
   win.webContents.on('did-finish-load', () => {
     const pages = defaultPages

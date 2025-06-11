@@ -5,5 +5,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   addTab: (name, content) => ipcRenderer.invoke('add-Tab', name, content),
   llmGenerate: (model, prompt) => ipcRenderer.invoke('llm-generate', { model, prompt }),
   onAddTab: (callback) => ipcRenderer.on('add-tab', (event, data) => callback(data)),
-  onDefaultPages: (callback) => ipcRenderer.on('default-pages', (event, pages) => callback(pages))
+  onDefaultPages: (callback) => ipcRenderer.on('default-pages', (event, pages) => callback(pages)),
+  savePersistent: (key, value) => ipcRenderer.invoke('save-persistent', key, value),
+  loadPersistent: (key) => ipcRenderer.invoke('load-persistent', key),
 });

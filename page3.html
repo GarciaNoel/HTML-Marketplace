@@ -72,7 +72,6 @@
       <div id="llm-response"></div>
       <textarea id="code-input" placeholder="Paste code here to send to LLM..."></textarea>
       <button id="send-llm-btn">Send</button>
-      
     </div>
   </div>
   <script>
@@ -92,6 +91,42 @@
       });
     };
 
+    const chatHistory = [];
+
+    function renderChatHistory() {
+      const chatDiv = document.getElementById('llm-response');
+      chatDiv.innerHTML = chatHistory.map(msg =>
+        `<div style="margin-bottom:8px;">
+          <b>${msg.role === 'user' ? 'You' : 'LLM'}:</b> ${msg.text}
+        </div>`
+      ).join('');
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+    }
+
+    document.getElementById('send-llm-btn').onclick = async function() {
+      const code = document.getElementById('code-input').value;
+      if (!code.trim()) return;
+      chatHistory.push({ role: 'user', text: code });
+      renderChatHistory();
+
+      // Format the chat history as a single prompt string
+      const prompt = chatHistory.map(msg =>
+        `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.text}`
+      ).join('\n') + '\nAssistant:';
+
+      const responseDiv = document.getElementById('llm-response');
+      responseDiv.textContent = "Waiting for LLM response...";
+      try {
+        const result = await window.electronAPI.llmGenerate('deepseek-r1:1.5b', prompt);
+        chatHistory.push({ role: 'llm', text: result });
+        renderChatHistory();
+        responseDiv.textContent = result;
+      } catch (e) {
+        responseDiv.textContent = "Error: " + e.message;
+      }
+    };
+
+    /* SINGLE LLM CALL EXAMPLE
     document.getElementById('send-llm-btn').onclick = async function() {
       const code = document.getElementById('code-input').value;
       const responseDiv = document.getElementById('llm-response');
@@ -103,6 +138,7 @@
         responseDiv.textContent = "Error: " + e.message;
       }
     };
+    */
   </script>
 </body>
 </html>
