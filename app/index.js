@@ -36,7 +36,7 @@ function createWindow() {
   })
 
   win.setMenu(null);
-  win.loadFile('index.html')
+  win.loadFile('app/index.html')
 
   //win.webContents.openDevTools();
 
@@ -94,7 +94,7 @@ function createWindow() {
 
     if (win) {
       win.webContents.send('add-tab', { name, content });
-      win.loadFile('index.html')
+      win.loadFile('app/index.html')
 
     }
   });
