@@ -38,6 +38,8 @@ function createWindow() {
   win.setMenu(null);
   win.loadFile('index.html')
 
+  //win.webContents.openDevTools();
+
   ipcMain.handle('save-persistent', (event, key, value) => {
     persistentData[key] = value;
     saveData(persistentData);
@@ -45,6 +47,10 @@ function createWindow() {
 
   ipcMain.handle('load-persistent', (event, key) => {
     return persistentData[key];
+  });
+
+  ipcMain.handle('get-app-path', () => {
+    return __dirname;
   });
 
   win.webContents.on('did-finish-load', () => {
@@ -91,6 +97,29 @@ function createWindow() {
       win.loadFile('index.html')
 
     }
+  });
+
+  ipcMain.handle('open-html-files-by-path', async (event, filePaths) => {
+    if (!filePaths || filePaths.length === 0) return [];
+    const paths = Array.isArray(filePaths) ? filePaths : [filePaths];
+
+    let updated = false;
+    for (const filePath of paths) {
+      const absPath = path.isAbsolute(filePath) ? filePath : path.join(__dirname, filePath);
+      if (!defaultPages.includes(absPath)) {
+        defaultPages.push(absPath);
+        updated = true;
+      }
+    }
+    if (updated) saveDefaultPages(defaultPages);
+
+    return paths
+      .map(filePath => path.isAbsolute(filePath) ? filePath : path.join(__dirname, filePath))
+      .filter(filePath => fs.existsSync(filePath))
+      .map(filePath => ({
+        name: path.basename(filePath),
+        content: fs.readFileSync(filePath, 'utf-8')
+      }));
   });
 
   const http = require('http'); 

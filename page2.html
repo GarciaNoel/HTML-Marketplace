@@ -60,12 +60,11 @@
       box-sizing: border-box;
     }
     .page-ai-root .prompt-box button {
-      align-self: flex-end;
-      padding: 8px 16px;
+      margin-left: 8px;
+      margin-right: 8px;
+      margin-bottom: 12px;
       font-size: 1em;
-    }
-    .page-ai-root .prompt-history h2 {
-      margin: 0 0 8px 0;
+      align-self: flex-end;
     }
   </style>
 </head>
@@ -95,6 +94,17 @@
 
       }
     })();
+
+    (async () => {
+      const saved = await window.electronAPI.loadPersistent('prompt-input');
+      if (typeof saved === 'string') {
+        document.getElementById('prompt-input').value = saved;
+      }
+    })();
+
+    document.getElementById('prompt-input').addEventListener('input', async (e) => {
+      await window.electronAPI.savePersistent('prompt-input', e.target.value);
+    });
 
     async function incrementCoin(amount = 1) {
       let coins = await window.electronAPI.loadPersistent?.('llmCoin');

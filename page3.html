@@ -32,10 +32,12 @@
       background: #fff;
     }
     .page-te-root #save-btn, .page-te-root #send-llm-btn {
+      margin-left: 8px;
+      margin-right: 8px;
       margin-bottom: 12px;
-      padding: 8px 16px;
+      margin-top: 12px;
       font-size: 1em;
-      align-self: flex-start;
+      align-self: flex-end;
     }
     .page-te-root #editor, .page-te-root #code-input {
       width: 100%;
@@ -75,6 +77,29 @@
     </div>
   </div>
   <script>
+
+    (async () => {
+      const saved = await window.electronAPI.loadPersistent('editor');
+      if (typeof saved === 'string') {
+        document.getElementById('editor').value = saved;
+      }
+    })();
+
+    document.getElementById('editor').addEventListener('input', async (e) => {
+      await window.electronAPI.savePersistent('editor', e.target.value);
+    });
+
+    (async () => {
+      const saved = await window.electronAPI.loadPersistent('code-input');
+      if (typeof saved === 'string') {
+        document.getElementById('code-input').value = saved;
+      }
+    })();
+
+    document.getElementById('code-input').addEventListener('input', async (e) => {
+      await window.electronAPI.savePersistent('code-input', e.target.value);
+    });
+
     document.getElementById('save-btn').onclick = function() {
       const text = document.getElementById('editor').value;
       const { dialog } = require('electron').remote || require('@electron/remote');

@@ -8,4 +8,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onDefaultPages: (callback) => ipcRenderer.on('default-pages', (event, pages) => callback(pages)),
   savePersistent: (key, value) => ipcRenderer.invoke('save-persistent', key, value),
   loadPersistent: (key) => ipcRenderer.invoke('load-persistent', key),
+  openHtmlFilesByPath: (paths) => ipcRenderer.invoke('open-html-files-by-path', paths),
+  getAppPath: () => ipcRenderer.invoke('get-app-path'),
 });
